@@ -3,7 +3,6 @@ import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
-// пошук елементів документа
 const refs = {
   form: document.querySelector('.search-form'),
   input: document.querySelector('input'),
@@ -11,50 +10,47 @@ const refs = {
   btnLoadMore: document.querySelector('.load-more'),
 };
 
-let page = 1; // початкове значення параметра page повинно бути 1 сторніка
+let page = 1; 
 
-refs.btnLoadMore.style.display = 'none'; // ховаємо кнопку
-refs.form.addEventListener('submit', onSearch); // слухач події на submit
-refs.btnLoadMore.addEventListener('click', onBtnLoadMore); // слухач події клік по кнопці loadMore
+refs.btnLoadMore.style.display = 'none';
+refs.form.addEventListener('submit', onSearch);
+refs.btnLoadMore.addEventListener('click', onBtnLoadMore); 
 
-// обробка події на submit
 function onSearch(evt) {
-  evt.preventDefault(); // відміна перезавантаження сторінки
+  evt.preventDefault(); 
 
   page = 1;
-  refs.gallery.innerHTML = ''; // очищення попереднього вмісту галереї
+  refs.gallery.innerHTML = ''; 
 
-  const name = refs.input.value.trim(); // обрізання пробілів до і після слова
+  const name = refs.input.value.trim(); 
 
-  // якщо слово пошука НЕ пуста строка то:
+  
   if (name !== '') {
-    pixabay(name); // отримати зображення
+    pixabay(name); 
 
   } else {
     refs.btnLoadMore.style.display = 'none';
 
-    // вивести повідомлення про те, що НЕ знайдено жодного зображення
+    
     return Notiflix.Notify.failure(
       'Sorry, there are no images matching your search query. Please try again.'
     );
   }
 }
 
-// дії кнопки LoadMore
+
 function onBtnLoadMore() {
   const name = refs.input.value.trim();
-  page += 1; // додаємо +1 сторінку яка має +40 картинок
-  pixabay(name, page); // завантаження зображень
+  page += 1; 
+  pixabay(name, page); 
 }
 
-// отримання зображень
 async function pixabay(name, page) {
   const API_URL = 'https://pixabay.com/api/';
 
-  // параметри запиту на бекенд
   const options = {
     params: {
-      key: '34601687-7bf20fd5140874a1b286911d5', // мій персональний ключ з pixabay
+      key: '34601687-7bf20fd5140874a1b286911d5', 
       q: name,
       image_type: 'photo',
       orientation: 'horizontal',
@@ -65,22 +61,19 @@ async function pixabay(name, page) {
   };
 
   try {
-    // отримання відповіді-результату від бекенду
     const response = await axios.get(API_URL, options);
 
-    // сповіщення notiflix
     notification(
-      response.data.hits.length, // довжина всіх знайдених зображень
-      response.data.total // отримання кількості
+      response.data.hits.length, 
+      response.data.total 
     );
 
-    createMarkup(response.data); // рендер розмітки на сторінку
+    createMarkup(response.data); 
   } catch (error) {
     console.log(error);
   }
 }
 
-// рендер розмітки на сторінку
 function createMarkup(arr) {
   const markup = arr.hits
     .map(
@@ -111,22 +104,21 @@ function createMarkup(arr) {
             </div>
         </a>`
     )
-    .join(''); // сполучення рядків всіх об'єктів (всіх картинок)
-  refs.gallery.insertAdjacentHTML('beforeend', markup); // вставлення розмітки на сторінку
-  simpleLightBox.refresh(); // оновлення екземпляру lightbox
+    .join(''); 
+  refs.gallery.insertAdjacentHTML('beforeend', markup); 
+  simpleLightBox.refresh(); 
 }
 
-// екземпляр модального вікна слайдера-зображень
 const simpleLightBox = new SimpleLightbox('.gallery a', {
-  captionsData: 'alt', // опис
-  captionDelay: 250, // затримка 250 мілісекунд
+  captionsData: 'alt', 
+  captionDelay: 250, 
 });
 
-// всі сповіщення notiflix
+
 function notification(length, totalHits) {
   if (length === 0) {
 
-      // вивести повідомлення про те, що НЕ знайдено жодного зображення
+      
     Notiflix.Notify.failure(
       'Sorry, there are no images matching your search query. Please try again.'
     );
@@ -134,20 +126,16 @@ function notification(length, totalHits) {
   }
 
   if (page === 1) {
-    refs.btnLoadMore.style.display = 'flex'; // показуємо кнопку loadMore
+    refs.btnLoadMore.style.display = 'flex'; 
 
-    // вивести повідомлення про кількість знайдених зобрежнь
     Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
   }
 
   if (length < 40) {
-    refs.btnLoadMore.style.display = 'none'; // ховаємо кнопку loadMore
+    refs.btnLoadMore.style.display = 'none'; 
 
-      // вивести інфо-повідомлення про те, що більше вже немає зображень
     Notiflix.Notify.info(
       "We're sorry, but you've reached the end of search results."
     );
   }
 }
-
-// Діма Берестень
